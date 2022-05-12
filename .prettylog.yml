@@ -1,7 +1,6 @@
 timestamp:
   key: time
   visible: true
-  colors: [32,12,34]
   format: "02/01/2006 15:04:05"
 
 logger:
@@ -15,7 +14,7 @@ caller:
   padding: 0
 
 level:
-  key: level
+  key: severity
   visible: true
   padding: 5
   colors:
@@ -26,5 +25,14 @@ level:
     fatal:
 
 message:
-  key: msg
+  key: message
   padding: 0
+
+fields:
+  pid:
+    visible: true
+  unformatted:
+    visible: false
+  uuid:
+    visible: true
+    color: [32,12,34]

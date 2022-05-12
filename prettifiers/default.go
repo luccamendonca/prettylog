@@ -2,9 +2,11 @@ package prettifiers
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"time"
 
+	"github.com/alecthomas/repr"
 	"github.com/fatih/color"
 	"github.com/globocom/prettylog/config"
 	"github.com/globocom/prettylog/parsers"
@@ -62,22 +64,43 @@ func writeTo(buffer *bytes.Buffer, value string, padding int, colorAttrs []color
 }
 
 func writeFieldsTo(buffer *bytes.Buffer, fields [][]string, colorsAttrs []color.Attribute) {
-	color := parseColor(colorsAttrs)
+	colorAttr := parseColor(colorsAttrs)
+	settings := config.GetSettings()
+	defaultFieldSettings := config.Field{
+		Visible: true,
+		Padding: 0,
+		Color:   []color.Attribute{color.FgBlack, color.Faint},
+	}
 
 	for _, field := range fields {
-		if color != nil {
-			buffer.WriteString(color.Sprint(field[0]))
+		fieldSettings, fieldSettingsExist := settings.Fields[field[0]]
+		if !fieldSettingsExist {
+			fieldSettings = defaultFieldSettings
+		}
+
+		colorAttr = parseColor(fieldSettings.Color)
+		if !fieldSettings.Visible {
+			continue
+		}
+
+		if colorAttr != nil {
+			buffer.WriteString(colorAttr.Sprint(field[0]))
 		} else {
 			buffer.WriteString(field[0])
 		}
 		buffer.WriteString(FIELD_SEPARATOR)
-		if strings.Contains(field[1], " ") {
-			buffer.WriteString(FIELD_QUOTES)
-			buffer.WriteString(field[1])
-			buffer.WriteString(FIELD_QUOTES)
-		} else {
-			buffer.WriteString(field[1])
+
+		fieldValue := field[1]
+		if strings.Contains(fieldValue, " ") {
+			fieldValue = fmt.Sprintf("%s%s%s", FIELD_QUOTES, fieldValue, FIELD_QUOTES)
 		}
+
+		repr.Println(fieldValue)
+
+		fieldColor := parseColor(fieldSettings.Color)
+		buffer.WriteString(fieldColor.Sprint(fieldValue))
+
+		buffer.WriteString(fieldValue)
 		buffer.WriteString(SEPARATOR)
 	}
 }

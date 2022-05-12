@@ -95,6 +95,7 @@ type Settings struct {
 	Caller    Field
 	Level     LevelField
 	Message   Field
+	Fields    map[string]Field
 }
 
 type TimestampField struct {
